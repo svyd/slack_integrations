@@ -1,2 +1,2 @@
-# slack_integrations
+# slack integrations
 Slack integration scripts
