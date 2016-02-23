@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Crmbo health checker
-# Version 0.3
+# Version 0.4
 # Feb, 23 2016
 
 #Modify these variables for your environment
@@ -19,22 +19,22 @@ check() {
      if [ $? -ne 0 ] ; then
           #echo "Error occurred getting URL $1"
           sed -i "s,^\($1=\).*,\1"${CRM_DOWN}","  $CONFIG_FILE
-          curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is down. Error occurred getting URL"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
+          curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $3 is down. Error occurred getting URL"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          if [ $? -eq 6 ]; then
               #echo "Unable to resolve host"
 	      sed -i "s,^\($1=\).*,\1"${CRM_DOWN}","  $CONFIG_FILE
-              curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is down. Unable to resolve host"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
+              curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $3 is down. Unable to resolve host"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          fi
          if [ $? -eq 7 ]; then
               #echo "Unable to connect to host"
 	      sed -i "s,^\($1=\).*,\1"${CRM_DOWN}","  $CONFIG_FILE
-              curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is down. Unable to connect to host"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
+              curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $3 is down. Unable to connect to host"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          fi
 #         exit 1
      else
          if [ $2 = $CRM_DOWN ]; then
               sed -i "s,^\($1=\).*,\1"${CRM_UP}","  $CONFIG_FILE
-              curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is UP."'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
+              curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $3 is UP."'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          fi
      fi
 }
