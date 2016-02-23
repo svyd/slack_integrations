@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Crmbo health checker
-# Version 0.2
-# Feb, 16 2016
+# Version 0.3
+# Feb, 23 2016
 
 #Modify these variables for your environment
 CRMBO_SERVER_QA="IP_CRM_QA"
@@ -16,35 +16,38 @@ CRM_UP="UP"
 CRM_DOWN="DOWN"
 
 check() {
-     source $CONFIG_FILE
-
      if [ $? -ne 0 ] ; then
-#         echo "Error occurred getting URL $1"
-          echo "crm_status=${CRM_DOWN}" > $CONFIG_FILE
+          #echo "Error occurred getting URL $1"
+          sed -i "s,^\($1=\).*,\1"${CRM_DOWN}","  $CONFIG_FILE
           curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is down. Error occurred getting URL"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          if [ $? -eq 6 ]; then
-#             echo "Unable to resolve host"
-              echo "crm_status=${CRM_DOWN}" > $CONFIG_FILE
+              #echo "Unable to resolve host"
+	      sed -i "s,^\($1=\).*,\1"${CRM_DOWN}","  $CONFIG_FILE
               curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is down. Unable to resolve host"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          fi
          if [ $? -eq 7 ]; then
-#             echo "Unable to connect to host"
-              echo "crm_status=${CRM_DOWN}" > $CONFIG_FILE
+              #echo "Unable to connect to host"
+	      sed -i "s,^\($1=\).*,\1"${CRM_DOWN}","  $CONFIG_FILE
               curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is down. Unable to connect to host"'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          fi
 #         exit 1
      else
-         if [ $crm_status = $CRM_DOWN ]; then
-              echo "crm_status=${CRM_UP}" > $CONFIG_FILE
+         if [ $2 = $CRM_DOWN ]; then
+              sed -i "s,^\($1=\).*,\1"${CRM_UP}","  $CONFIG_FILE
               curl -X POST --data-urlencode 'payload={"channel":"'"${SLACK_CHANNEL}"'", "username": "'"${SLACK_BOTNAME}"'", "text": "'"CRMBO $1 is UP."'", "icon_emoji": ":ghost:"}' ${SLACK_HOSTNAME}
          fi
      fi
 }
 
-crm_check() {
-    curl -s -o "/dev/null" $1
-    check $1;
+config_read() {
+    source $CONFIG_FILE
 }
 
-crm_check $CRMBO_SERVER_QA;
-#crm_check $CRMBO_SERVER_CFD;
+crm_check() {
+    curl -s -o "/dev/null" $3
+    check $1 $2 $3;
+}
+
+config_read;
+crm_check crm_status_qa $crm_status_qa $CRMBO_SERVER_QA;
+crm_check crm_status_cfd $crm_status_cfd $CRMBO_SERVER_CFD;
